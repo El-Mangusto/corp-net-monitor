@@ -1,7 +1,7 @@
 package com.elmangusto.corpnetmonitor.exceptions;
 
-public class SnmpMonitoringServiceException extends RuntimeException {
-    public SnmpMonitoringServiceException(String message) {
+public class SnmpServiceException extends RuntimeException {
+    public SnmpServiceException(String message) {
         super(message);
     }
 }
