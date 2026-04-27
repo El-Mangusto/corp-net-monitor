@@ -31,11 +31,11 @@ public class MonitoringService {
     private final NetworkInterfaceRepository networkInterfaceRepository;
 
     public void scanDevices() {
-        deviceService.getAllDevices().forEach(this::collectDeviceMetric);
+        deviceService.getAllDevicesEntities().forEach(this::collectDeviceMetric);
     }
 
     @Transactional
-    private void collectDeviceMetric(Device device) {
+    public void collectDeviceMetric(Device device) {
         try {
             Metric metric = Metric.builder()
                     .device(device)

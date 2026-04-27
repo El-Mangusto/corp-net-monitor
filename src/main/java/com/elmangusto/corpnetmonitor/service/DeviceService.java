@@ -1,6 +1,9 @@
 package com.elmangusto.corpnetmonitor.service;
 
 import com.elmangusto.corpnetmonitor.collector.SnmpManager;
+import com.elmangusto.corpnetmonitor.dto.DeviceRequest;
+import com.elmangusto.corpnetmonitor.dto.DeviceResponse;
+import com.elmangusto.corpnetmonitor.dto.mapper.DeviceDtoMapper;
 import com.elmangusto.corpnetmonitor.exceptions.SnmpServiceException;
 import com.elmangusto.corpnetmonitor.mapper.SysDescrMapper;
 import com.elmangusto.corpnetmonitor.model.Device;
@@ -23,18 +26,24 @@ public class DeviceService {
     private final SnmpManager snmpManager;
     private final SysDescrMapper sysDescrMapper;
     private final NetworkInterfaceService networkInterfaceService;
+    private final DeviceDtoMapper deviceDtoMapper;
 
-    public List<Device> getAllDevices() {
-        return deviceRepository.findAll();
+    public List<DeviceResponse> getAllDevices() {
+        return deviceRepository.findAll().stream()
+                .map(deviceDtoMapper::toResponse)
+                .toList();
     }
 
-    public Device getDevice(Long id) {
-        return deviceRepository.findById(id)
+    public DeviceResponse getDevice(Long id) {
+        Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
+        return deviceDtoMapper.toResponse(device);
     }
 
     @Transactional
-    public Device syncDevice(String ipAddress) {
+    public DeviceResponse syncDevice(DeviceRequest request) {
+        String ipAddress = request.getIpAddress();
+
         String rawSoftware = snmpManager.getMetric(ipAddress, SnmpMetric.SYS_DESCR);
         String software = sysDescrMapper.map(rawSoftware);
         String name = snmpManager.getMetric(ipAddress, SnmpMetric.SYS_NAME);
@@ -60,24 +69,31 @@ public class DeviceService {
             List<VariableBinding> names = snmpManager.walk(ipAddress, SnmpMetric.IF_DESCR);
             List<VariableBinding> types = snmpManager.walk(ipAddress, SnmpMetric.IF_TYPE);
             List<VariableBinding> speeds = snmpManager.walk(ipAddress, SnmpMetric.IF_SPEED);
-
             networkInterfaceService.syncInterfaces(savedDevice, names, types, speeds);
         } catch (Exception e) {
             throw new SnmpServiceException("Failed to sync interfaces for " + ipAddress + ": " + e.getMessage());
         }
-        return savedDevice;
+
+        return deviceDtoMapper.toResponse(savedDevice);
     }
 
     @Transactional
-    public Device updateDevice(Long id, Device deviceDetails) {
-        Device device = getDevice(id);
-        device.setName(deviceDetails.getName());
-        device.setIpAddress(deviceDetails.getIpAddress());
-        return deviceRepository.save(device);
+    public DeviceResponse updateDevice(Long id, DeviceRequest request) {
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + id));
+        device.setIpAddress(request.getIpAddress());
+        return deviceDtoMapper.toResponse(deviceRepository.save(device));
     }
 
     @Transactional
     public void deleteDevice(Long id) {
+        if (!deviceRepository.existsById(id)) {
+            throw new EntityNotFoundException("Device not found with id: " + id);
+        }
         deviceRepository.deleteById(id);
+    }
+
+    public List<Device> getAllDevicesEntities() {
+        return deviceRepository.findAll();
     }
 }
