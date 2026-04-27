@@ -14,12 +14,10 @@ public class MonitoringScheduler {
 
     @Scheduled(fixedRate = INTERVAL)
     public void scheduleMonitoring() {
-        System.out.println(">>> [SCHEDULER] Запуск планового сканирования устройств...");
         try {
             monitoringService.scanDevices();
-            System.out.println(">>> [SCHEDULER] Сканирование завершено успешно.");
         } catch (Exception e) {
-            System.err.println(">>> [SCHEDULER] ОШИБКА при сканировании: " + e.getMessage());
+            System.err.println("[SCHEDULER] ERROR: " + e.getMessage());
         }
     }
 }

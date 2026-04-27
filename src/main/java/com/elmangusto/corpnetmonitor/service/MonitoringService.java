@@ -35,7 +35,7 @@ public class MonitoringService {
     }
 
     @Transactional
-    public void collectDeviceMetric(Device device) {
+    private void collectDeviceMetric(Device device) {
         try {
             Metric metric = Metric.builder()
                     .device(device)

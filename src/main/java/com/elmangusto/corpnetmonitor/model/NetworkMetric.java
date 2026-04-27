@@ -1,12 +1,11 @@
 package com.elmangusto.corpnetmonitor.model;
 
+import com.elmangusto.corpnetmonitor.model.enums.InterfaceStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@ToString(exclude = {"metric", "networkInterface"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

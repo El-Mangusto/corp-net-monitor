@@ -1,4 +1,4 @@
-package com.elmangusto.corpnetmonitor.model;
+package com.elmangusto.corpnetmonitor.model.enums;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

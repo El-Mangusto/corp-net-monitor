@@ -6,24 +6,19 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CpuLoadMapper implements SnmpMapper<Double>{
-    @Override
-    @SuppressWarnings("unchecked")
-    public Double map(Object... args) {
+public class CpuLoadMapper {
 
-        List<VariableBinding> cpuCores = (List<VariableBinding>) args[0];
-
+    public Double map(List<VariableBinding> cpuCores) {
         if (cpuCores == null || cpuCores.isEmpty()) {
             return 0.0;
         }
 
-        double sumPercentCores = 0;
-        for (VariableBinding cpuCore : cpuCores) {
-            sumPercentCores += cpuCore.getVariable().toLong();
+        double sum = 0;
+        for (VariableBinding core : cpuCores) {
+            sum += core.getVariable().toLong();
         }
 
-        double average = sumPercentCores / cpuCores.size();
-
+        double average = sum / cpuCores.size();
         return Math.round(average * 100.0) / 100.0;
     }
 }

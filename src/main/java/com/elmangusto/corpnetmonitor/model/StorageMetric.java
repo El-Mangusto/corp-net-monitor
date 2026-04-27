@@ -3,6 +3,7 @@ package com.elmangusto.corpnetmonitor.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Data
 @ToString(exclude = "metric")
 @AllArgsConstructor

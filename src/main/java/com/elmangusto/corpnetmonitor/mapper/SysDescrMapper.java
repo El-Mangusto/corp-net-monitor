@@ -1,42 +1,29 @@
 package com.elmangusto.corpnetmonitor.mapper;
 
-import com.elmangusto.corpnetmonitor.exceptions.SnmpMapperException;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Component
-public class SysDescrMapper implements SnmpMapper<String> {
+public class SysDescrMapper {
 
-    @Override
-    public String map(Object... args) {
-        if (args == null || args.length == 0 || args[0] == null) {
-            return "Unknown";
-        }
+    private static final Map<String, String> OS_MAP = Map.of(
+            "windows", "Windows",
+            "linux", "Linux",
+            "cisco", "Cisco IOS",
+            "unix", "Unix",
+            "freebsd", "FreeBSD"
+    );
 
-        String value = args[0].toString();
+    public String map(String value) {
+        if (value == null || value.isBlank()) return "Unknown";
 
-        if (value.isEmpty()) {
-            return "Unknown";
-        }
+        String lower = value.toLowerCase();
 
-        try {
-            String lower = value.toLowerCase();
-
-            if (lower.contains("windows")) {
-                return "Windows";
-            } else if (lower.contains("linux")) {
-                return "Linux";
-            } else if (lower.contains("cisco")) {
-                return "Cisco IOS";
-            } else if (lower.contains("unix")) {
-                return "Unix";
-            } else if (lower.contains("freebsd")) {
-                return "FreeBSD";
-            } else {
-                return "Unknown";
-            }
-
-        } catch (Exception e) {
-            throw new SnmpMapperException("SysDescrMapper failed to parse value [" + value + "]: " + e.getMessage());
-        }
+        return OS_MAP.entrySet().stream()
+                .filter(entry -> lower.contains(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse("Unknown");
     }
 }

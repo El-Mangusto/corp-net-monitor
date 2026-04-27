@@ -1,12 +1,11 @@
 package com.elmangusto.corpnetmonitor.model;
 
+import com.elmangusto.corpnetmonitor.model.enums.InterfaceType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@ToString(exclude = "device")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
