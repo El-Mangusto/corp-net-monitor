@@ -3,6 +3,7 @@ package com.elmangusto.corpnetmonitor.controller;
 import com.elmangusto.corpnetmonitor.dto.DeviceRequest;
 import com.elmangusto.corpnetmonitor.dto.DeviceResponse;
 import com.elmangusto.corpnetmonitor.service.DeviceService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ public class DeviceController {
     @PutMapping("/{id}")
     public ResponseEntity<DeviceResponse> updateDevice(
             @PathVariable Long id,
-            @RequestBody DeviceRequest request
+            @Valid @RequestBody DeviceRequest request
     ) {
         return ResponseEntity.ok(deviceService.updateDevice(id, request));
     }

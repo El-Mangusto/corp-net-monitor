@@ -25,6 +25,7 @@ public class NetworkInterfaceService {
     private final NetworkInterfaceDtoMapper dtoMapper;
     private final DeviceRepository deviceRepository;
 
+    @Transactional(readOnly = true)
     public List<NetworkInterfaceResponse> getInterfacesByDevice(Long deviceId) {
         Device device = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + deviceId));
@@ -34,6 +35,7 @@ public class NetworkInterfaceService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public NetworkInterfaceResponse getInterface(Long deviceId, Long interfaceId) {
         Device device = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new EntityNotFoundException("Device not found with id: " + deviceId));
