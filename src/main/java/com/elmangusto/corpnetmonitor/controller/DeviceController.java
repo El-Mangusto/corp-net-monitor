@@ -29,7 +29,7 @@ public class DeviceController {
     }
 
     @PostMapping
-    public ResponseEntity<DeviceResponse> addDevice(@RequestBody DeviceRequest request) {
+    public ResponseEntity<DeviceResponse> addDevice(@Valid @RequestBody DeviceRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(deviceService.syncDevice(request));
     }
 
