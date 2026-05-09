@@ -3,9 +3,8 @@ package com.elmangusto.corpnetmonitor.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 @Data
-@ToString(exclude = "metric")
+@ToString(exclude = {"metric", "storage"})
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -21,14 +20,9 @@ public class StorageMetric {
     @JoinColumn(name = "id_metric", nullable = false)
     private Metric metric;
 
-    @Column
-    private String name;
-
-    @Column
-    private String type;
-
-    @Column(name = "total_size_gb")
-    private Double totalSizeGb;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "storage_id", nullable = false)
+    private Storage storage;
 
     @Column(name = "used_size_gb")
     private Double usedSizeGb;

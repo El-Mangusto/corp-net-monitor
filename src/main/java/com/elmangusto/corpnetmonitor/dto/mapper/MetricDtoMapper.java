@@ -16,7 +16,7 @@ public class MetricDtoMapper {
                 .processes(metric.getProcesses())
                 .cpuLoadAvg(metric.getCpuLoadAvg())
                 .storages(metric.getStorageMetrics().stream()
-                        .map(this::toStorageResponse)
+                        .map(this::toStorageMetricResponse)
                         .toList())
                 .network(metric.getNetworkMetrics().stream()
                         .map(this::toNetworkResponse)
@@ -33,11 +33,11 @@ public class MetricDtoMapper {
                 .build();
     }
 
-    public StorageMetricResponse toStorageResponse(StorageMetric s) {
+    public StorageMetricResponse toStorageMetricResponse(StorageMetric s) {
         return StorageMetricResponse.builder()
-                .name(s.getName())
-                .type(s.getType())
-                .totalSizeGb(s.getTotalSizeGb())
+                .name(s.getStorage().getName())
+                .type(s.getStorage().getType())
+                .totalSizeGb(s.getStorage().getTotalSizeGb())
                 .usedSizeGb(s.getUsedSizeGb())
                 .usedPercent(s.getUsedPercent())
                 .captureAt(s.getMetric().getCaptureAt())

@@ -7,6 +7,7 @@ import com.elmangusto.corpnetmonitor.mapper.*;
 import com.elmangusto.corpnetmonitor.model.*;
 import com.elmangusto.corpnetmonitor.repository.MetricRepository;
 import com.elmangusto.corpnetmonitor.repository.NetworkInterfaceRepository;
+import com.elmangusto.corpnetmonitor.repository.StorageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,11 +24,13 @@ public class MonitoringCollector {
     private final SnmpManager snmpManager;
     private final UptimeMapper uptimeMapper;
     private final StorageMapper storageMapper;
+    private final StorageMetricMapper storageMetricMapper;
     private final CpuLoadMapper cpuLoadMapper;
     private final ProcessesMapper processesMapper;
     private final NetworkMetricMapper networkMetricMapper;
     private final MetricRepository metricRepository;
     private final NetworkInterfaceRepository networkInterfaceRepository;
+    private final StorageRepository storageRepository;
 
     @Transactional
     public void collectDeviceMetric(Device device) {
@@ -42,7 +45,7 @@ public class MonitoringCollector {
             collectUptime(device.getIpAddress(), metric);
             collectProcesses(device.getIpAddress(), metric);
             collectCpuLoad(device.getIpAddress(), metric);
-            collectStorages(device.getIpAddress(), metric);
+            collectStorages(device, metric);
             collectNetworkMetrics(device, metric);
 
             metricRepository.save(metric);
@@ -65,19 +68,25 @@ public class MonitoringCollector {
         metric.setCpuLoadAvg(cpuLoadMapper.map(snmpManager.walk(ip, SnmpMetric.HR_PROCESSOR_LOAD)));
     }
 
-    private void collectStorages(String ip, Metric metric) {
+    private void collectStorages(Device device, Metric metric) {
+        String ip = device.getIpAddress();
         var names = snmpManager.walk(ip, SnmpMetric.HR_STORAGE_DESCR);
         var units = snmpManager.walk(ip, SnmpMetric.HR_STORAGE_UNITS);
         var sizes = snmpManager.walk(ip, SnmpMetric.HR_STORAGE_SIZE);
-        var used  = snmpManager.walk(ip, SnmpMetric.HR_STORAGE_USED);
-        metric.getStorageMetrics().addAll(storageMapper.map(names, units, sizes, used, metric));
+        var used = snmpManager.walk(ip, SnmpMetric.HR_STORAGE_USED);
+
+        List<Storage> dbStorages = storageRepository.findByDevice(device);
+
+        metric.getStorageMetrics().addAll(
+                storageMetricMapper.map(names, units, sizes, used, metric, dbStorages)
+        );
     }
 
     private void collectNetworkMetrics(Device device, Metric metric) {
         String ip = device.getIpAddress();
-        var inOctets  = snmpManager.walk(ip, SnmpMetric.IF_IN_OCTETS);
+        var inOctets = snmpManager.walk(ip, SnmpMetric.IF_IN_OCTETS);
         var outOctets = snmpManager.walk(ip, SnmpMetric.IF_OUT_OCTETS);
-        var statuses  = snmpManager.walk(ip, SnmpMetric.IF_OPER_STATUS);
+        var statuses = snmpManager.walk(ip, SnmpMetric.IF_OPER_STATUS);
 
         List<NetworkInterface> interfaces = networkInterfaceRepository.findByDevice(device);
         List<NetworkMetric> netList = networkMetricMapper.map(

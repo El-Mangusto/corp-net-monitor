@@ -26,6 +26,7 @@ public class DeviceService {
     private final SnmpManager snmpManager;
     private final SysDescrMapper sysDescrMapper;
     private final NetworkInterfaceService networkInterfaceService;
+    private final StorageService storageService;
     private final DeviceDtoMapper deviceDtoMapper;
 
     public List<DeviceResponse> getAllDevices() {
@@ -66,12 +67,21 @@ public class DeviceService {
         Device savedDevice = deviceRepository.save(device);
 
         try {
-            List<VariableBinding> names = snmpManager.walk(ipAddress, SnmpMetric.IF_DESCR);
-            List<VariableBinding> types = snmpManager.walk(ipAddress, SnmpMetric.IF_TYPE);
-            List<VariableBinding> speeds = snmpManager.walk(ipAddress, SnmpMetric.IF_SPEED);
-            networkInterfaceService.syncInterfaces(savedDevice, names, types, speeds);
+            List<VariableBinding> ifNames = snmpManager.walk(ipAddress, SnmpMetric.IF_DESCR);
+            List<VariableBinding> ifTypes = snmpManager.walk(ipAddress, SnmpMetric.IF_TYPE);
+            List<VariableBinding> ifSpeeds = snmpManager.walk(ipAddress, SnmpMetric.IF_SPEED);
+            networkInterfaceService.syncInterfaces(savedDevice, ifNames, ifTypes, ifSpeeds);
         } catch (Exception e) {
             throw new SnmpServiceException("Failed to sync interfaces for " + ipAddress + ": " + e.getMessage());
+        }
+
+        try {
+            List<VariableBinding> storageNames = snmpManager.walk(ipAddress, SnmpMetric.HR_STORAGE_DESCR);
+            List<VariableBinding> storageUnits = snmpManager.walk(ipAddress, SnmpMetric.HR_STORAGE_UNITS);
+            List<VariableBinding> storageSizes = snmpManager.walk(ipAddress, SnmpMetric.HR_STORAGE_SIZE);
+            storageService.syncStorages(savedDevice, storageNames, storageUnits, storageSizes);
+        } catch (Exception e) {
+            throw new SnmpServiceException("Failed to sync storages for " + ipAddress + ": " + e.getMessage());
         }
 
         return deviceDtoMapper.toResponse(savedDevice);

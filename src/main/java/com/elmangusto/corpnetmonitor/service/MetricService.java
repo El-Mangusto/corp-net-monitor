@@ -55,7 +55,7 @@ public class MetricService {
                 ? storageMetricRepository.findByDeviceIdAndPeriod(deviceId, from, to, PageRequest.of(0, pageSize))
                 : storageMetricRepository.findByDeviceIdOrderByCaptureAtDesc(deviceId, PageRequest.of(0, pageSize)))
                 .stream()
-                .map(mapper::toStorageResponse)
+                .map(mapper::toStorageMetricResponse)
                 .toList();
     }
 
